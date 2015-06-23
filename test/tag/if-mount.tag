@@ -1,5 +1,8 @@
 <conditional-tag>
     <p>Conditional Tag</p>
+    this.on('mount', function() {
+       console.log("CONDITIONAL TAG MOUNT TRIGGER")
+    })
 </conditional-tag>
 
 <if-level2>
@@ -14,6 +17,10 @@
     self.condition = !self.condition;
     self.update();
   }
+
+  this.on('mount', function() {
+    console.log("IF LEVEL 2 MOUNT TRIGGER")
+  })
 </if-level2>
 <if-level1>
   <div if={ condition }>

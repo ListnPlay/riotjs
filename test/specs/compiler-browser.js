@@ -970,7 +970,7 @@ describe('Compiler Browser', function() {
   it('mount event should only be triggered when the conditional tags are in the DOM', function() {
     var tag = riot.mount('if-mount')[0]
 
-    //expect(tag.tags.ff.tags['if-level2'].tags['conditional-tag'].mounted).to.be(false)
+    expect(tag.tags.ff.tags['if-level2'].tags['conditional-tag'].isMounted).to.be(false)
     /*expect(tag.tags.ft.tags['if-level2'].tags['conditional-tag'].mounted).to.be(false)
     expect(tag.tags.tf.tags['if-level2'].tags['conditional-tag'].mounted).to.be(false)
     expect(tag.tags.tt.tags['if-level2'].tags['conditional-tag'].mounted).to.be(true)
