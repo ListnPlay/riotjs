@@ -6,6 +6,22 @@ body_id: riot-releases
 
 ====
 
+### 2.2.1 *June 28, 2015*
+
+- Fix the options are not correctly passed to the children in a loop [more details here](https://github.com/riot/riot/issues/884)
+
+### 2.2.0 *June 27, 2015*
+
+- New super fast loop logic ( the DOM nodes will be no longer reordered [more details here](https://github.com/riot/riot/issues/484) )
+- Re-enable the `use strict` mode
+- Re-enable the `coffescript` mode for the nostalgics
+- Fix inconsistencies using loop with empty or null arrays
+- Fix the `mount` in the loop children
+- Increase the code coverage
+- Add the possibility to specify where riot will inject the custom tags [css in the DOM](/riotjs/guide/#scoped-css)
+
+List of bug fixes and details can be found [here](https://github.com/riot/riot/issues/773)
+
 ### 2.1.0 *May 20, 2015*
 
 - [Mixins](/riotjs/guide/#mixins)

@@ -328,7 +328,15 @@ describe('Compiler Browser', function() {
 
           // Don't trigger mount for conditional tags
           '<script type=\"riot\/tag\" src=\"tag\/if-mount.tag\"><\/script>',
-          '<if-mount><\/if-mount>'
+          '<if-mount><\/if-mount>',
+
+          // input type=number
+          '<script type=\"riot\/tag\" src=\"tag\/input-number.tag\"><\/script>',
+          '<input-number><\/input-number>',
+
+          // input type=number
+          '<script type=\"riot\/tag\" src=\"tag\/nested-riot.tag\"><\/script>',
+          '<container-riot><\/container-riot>'
 
     ].join('\r'),
       tags = [],
@@ -524,7 +532,11 @@ describe('Compiler Browser', function() {
   })
 
   it('the each loops update correctly the DOM nodes', function() {
-    var tag = riot.mount('loop')[0],
+    var onItemClick = function(e) {
+          var elIndex = Array.prototype.slice.call(children).indexOf(e.currentTarget)
+          expect(tag.items[elIndex]).to.be.equal(e.item)
+        },
+        tag = riot.mount('loop', { onItemClick: onItemClick })[0],
         root = tag.root,
         button = root.getElementsByTagName('button')[0],
         itemsCount = 5
@@ -1028,6 +1040,21 @@ describe('Compiler Browser', function() {
     })
 
     tags.push(tag)
-  }) */
+  })
+
+  it('input type=number', function() {
+    var tag = riot.mount('input-number', {num: 123})[0]
+    var inp = tag.root.getElementsByTagName('input')[0]
+    expect(inp.getAttribute('type')).to.be('number')
+    expect(inp.value).to.be('123')
+    tags.push(tag)
+  })
+
+  it('riot-tag as expression', function() {
+    var tag = riot.mount('container-riot')[0]
+    var div = tag.root.getElementsByTagName('div')[0]
+    expect(div.getAttribute('riot-tag')).to.be('nested-riot')
+    tags.push(tag)
+  })
 
 })
