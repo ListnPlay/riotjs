@@ -6,6 +6,33 @@ body_id: riot-releases
 
 ====
 
+### 2.2.2 *July 5, 2015*
+
+- New child components will inherit properties from the parent also in a loop
+- New riot is able to compile attributes also on the top level tag [more details](https://github.com/riot/riot/issues/948)
+- Improve the loop performances and fix many bugs
+- Improve the AMD/commonjs compatibility
+- Fix the error thrown in the compiler for the tags using type=text/javascript attribute
+- Fix parent variables not exposed to the loop children, __now all the children in a loop will inherit the parent properties/methods__ [more details](https://github.com/riot/riot/issues/896)
+- Fix the error thrown trying to override read only events properties
+- Fix the riot cli combined with the --modular flag when no output file is specified
+
+### 2.2.1 *June 28, 2015*
+
+- Fix the options are not correctly passed to the children in a loop [more details here](https://github.com/riot/riot/issues/884)
+
+### 2.2.0 *June 27, 2015*
+
+- New super fast loop logic ( the DOM nodes will be no longer reordered [more details here](https://github.com/riot/riot/issues/484) )
+- Re-enable the `use strict` mode
+- Re-enable the `coffescript` mode for the nostalgics
+- Fix inconsistencies using loop with empty or null arrays
+- Fix the `mount` in the loop children
+- Increase the code coverage
+- Add the possibility to specify where riot will inject the custom tags [css in the DOM](/riotjs/guide/#scoped-css)
+
+List of bug fixes and details can be found [here](https://github.com/riot/riot/issues/773)
+
 ### 2.1.0 *May 20, 2015*
 
 - [Mixins](/riotjs/guide/#mixins)

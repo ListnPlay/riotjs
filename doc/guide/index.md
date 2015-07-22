@@ -71,7 +71,7 @@ A Riot tag is a combination of layout (HTML) and logic (JavaScript). Here are th
 * ES6 method syntax is supported: `methodName()` becomes `this.methodName = function()` and `this` variable always points to the current tag instance.
 * A shorthand syntax for class names is available: `class={ completed: done }` renders to `class="completed"`when the value of `done` is a true value.
 * Boolean attributes (checked, selected etc..) are ignored when the expression value is falsy: `<input checked={ undefined }>` becomes `<input>`.
-* All attribute names must be *lowercase*.
+* All attribute names *must be lowercase*. This is due to browser specification.
 * Self-closing tags are supported: `<div/>` equals `<div></div>`. Well known "open tags" such as `<br>`, `<hr>`, `<img>` or `<input>` are never closed after the compilation.
 * Custom tags always need to be closed (normally or self-closed).
 * Standard HTML tags (`label`, `table`, `a` etc..) can also be customized, but not necessarily a wise thing to do.
@@ -171,6 +171,14 @@ You can put a `style` tag inside. Riot.js automatically takes it out and injects
 
 This happens once, no matter how many times the tag is initialized.
 
+To make it easier to override the CSS you can specify where in the `<head>` Riot should inject tag styles:
+
+```html
+<style type="riot"></style>
+```
+
+Example use case would be to insert tag styles from a component library after normalize.css but before your website's theme CSS allowing you to override the library's default styling.
+
 ## Mounting
 
 Once a tag is created you can mount it on the page as follows:
@@ -248,7 +256,7 @@ Mixins provide an easy way to share functionality across tags. When a tag is com
 var OptsMixin = {
     init: function() {
       this.on('updated', function() { console.log('Updated!') })
-    }
+    },
 
     getOpts: function() {
         return this.opts
@@ -272,7 +280,7 @@ var OptsMixin = {
 </my-tag>
 ```
 
-In this example you are giving any instance of the `my-tag` Tag the `OptsMixin` which provides `getOpts` and `setOpts` methods. `init` method is special one which can initialize the mixin when it's loaded to the tag. (`init` method is not accessible from other method)
+In this example you are giving any instance of the `my-tag` Tag the `OptsMixin` which provides `getOpts` and `setOpts` methods. `init` method is special one which can initialize the mixin when it's loaded to the tag. (`init` method is not accessible from the tag its mixed in)
 
 ```
 var my_tag_instance = riot.mount('my-tag')[0]
@@ -282,7 +290,7 @@ console.log(my_tag_instance.getOpts()) //will log out any opts that the tag has
 
 Tags will accept any object -- `{'key': 'val'}` `var mix = new function(...)` -- and will error out when any other type is passed to it.
 
-The `my-tag` definition now has a `getId` method added to it along with anything defined in the `OptsMixin`.
+The `my-tag` definition now has a `getId` method added to it along with anything defined in the `OptsMixin` except for the `init` function.
 
 ```
 function IdMixin() {
@@ -375,7 +383,7 @@ You can have multiple event listeners for the same event. See [observable](/riot
 
 ## Expressions
 
-HTML can be mixed with expressions that are enclosed in brackets:
+HTML can be mixed with expressions that are enclosed in curly braces:
 
 ``` js
 { /* my_expression goes here */ }
@@ -446,14 +454,14 @@ evaluates to "foo baz zorro". Property names whose value is truthful are appende
 
 ### Printing brackets
 
-You can output an expression without evaluation by escaping the opening bracket:
+You can output an expression without evaluation by escaping the opening brace:
 
 `\\{ this is not evaluated \\}` outputs `{ this is not evaluated }`
 
 
-### Customizing brackets
+### Customizing curly braces
 
-You are free to customize the brackets to your liking. For example:
+You are free to customize the braces to your liking. For example:
 
 ``` js
 riot.settings.brackets = '${ }'
@@ -522,6 +530,8 @@ Let's define a parent tag `<account>` and with a nested tag `<subscription>`:
 
 </subscription>
 ```
+
+<span class="tag red">important</span> Note how we named the `show_details` attribute using an underscore instead of camel case, which due to browser specification would have been automatically converted to lowercase.
 
 Then we mount the `account` tag to the page with a `plan` configuration option:
 
@@ -689,7 +699,9 @@ The element with the `each` attribute will be repeated for all items in the arra
 
 ### Context
 
-A new context is created for each item and the parent can be accessed through the `parent` variable. For example:
+A new context is created for each item. These are [tag instances](/riotjs/api/#tag-instance). When loops are nested, all the children tags in the loop inherit any of their parent loop's properties and methods they themselves have `undefined`. In this way, Riot avoids overriding things that should not be overridden by the parent tag.
+
+The parent can be explicitly accessed through the `parent` variable. For example:
 
 
 ```

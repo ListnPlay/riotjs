@@ -63,7 +63,7 @@ Mount a custom tag named tagName on a given domNode passing optional data with o
 riot.mount(document.getElementById('slide'), 'users', api)
 ```
 
-@returns: mounted [tag instance](#tag-instance)
+@returns: an array of the mounted [tag instances](#tag-instance)
 
 
 ### riot.mountTo(domNode, tagName, [opts]) | #mount-to
@@ -130,6 +130,8 @@ You have access to nested tag instances via `tags` variable:
 </my-tag>
 ```
 
+If more than one of the same child tag is used, it is accessed as an array `this.tags.child[n]`
+
 You can also use the `name` attribute to give another name for the nested tag.
 
 ``` html
@@ -157,7 +159,6 @@ The child tags are initialized after the parent tag so the methods and propertie
 
 </my-tag>
 ```
-
 
 ### this.update() | #tag-update
 
@@ -280,13 +281,13 @@ Creates a new custom tag "manually" without the compiler.
 riot.tag('timer',
   '<p>Seconds Elapsed: { time }</p>',
   'timer { display: block; border: 2px }',
-  'class="tic-toc"'
+  'class="tic-toc"',
   function (opts) {
     var self = this
     this.time = opts.start || 0
 
     this.tick = function () {
-      self.update({ time: ++this.time })
+      self.update({ time: ++self.time })
     }
 
     var timer = setInterval(this.tick, 1000)

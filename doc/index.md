@@ -1,5 +1,5 @@
 
-title: Riot 2.1 | A React-like UI library
+title: Riot 2.2 | A React-like UI library
 subtitle: Why Riot?
 description: And why we need a new UI library
 body_id: riot-home
@@ -74,7 +74,7 @@ HTML syntax is the *de facto* language of the web and it's designed for building
 - One way data flow: updates and unmounts are propagated downwards from parent to children.
 - Expressions are pre-compiled and cached for high performance.
 - Lifecycle events for more control.
-- Server-side rendering of custom tags
+- Server-side rendering of custom tags for isomorphic applications.
 
 
 ### Close to standards
