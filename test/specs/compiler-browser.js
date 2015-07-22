@@ -134,8 +134,11 @@ describe('Compiler Browser', function() {
 
           '<loop>',
           '<ul>',
-          '  <li each="{ item, i in items }">{ i } { item.value } <\/li>',
+          '  <li each="{ item, i in items }" onclick="{ parent.opts.onItemClick }">{ i } { item.value } <\/li>',
           '<\/ul>',
+          '<dl>',
+          '  <dt each="{ removes }" onclick="{ parent.opts.removeItemClick }"> { value } <\/dt>',
+          '<\/dl>',
           '<button onclick={ addSomeItems }>btn<\/button>',
 
           'this.items = []',
@@ -159,6 +162,10 @@ describe('Compiler Browser', function() {
           // loop order
           '<loop-manip><\/loop-manip>',
           '<script type=\"riot\/tag\" src=\"tag\/loop-manip.tag\"><\/script>',
+
+          // loop object
+          '<loop-object><\/loop-object>',
+          '<script type=\"riot\/tag\" src=\"tag\/loop-object.tag\"><\/script>',
 
           // looped child
           '<nested-child><\/nested-child>',
@@ -336,7 +343,35 @@ describe('Compiler Browser', function() {
 
           // input type=number
           '<script type=\"riot\/tag\" src=\"tag\/nested-riot.tag\"><\/script>',
-          '<container-riot><\/container-riot>'
+          '<container-riot><\/container-riot>',
+
+          // recursive tags
+          '<script type=\"riot\/tag\" src=\"tag\/treeview.tag\"><\/script>',
+          '<treeview><\/treeview>',
+
+          // sync the loop options
+          '<script type=\"riot\/tag\" src=\"tag\/loop-sync-options.tag\"><\/script>',
+          '<loop-sync-options><\/loop-sync-options>',
+
+          // sync the loop options in nested tags
+          '<script type=\"riot\/tag\" src=\"tag\/loop-sync-options-nested.tag\"><\/script>',
+          '<loop-sync-options-nested><\/loop-sync-options-nested>',
+
+          // inherit properties from the parent
+          '<script type=\"riot\/tag\" src=\"tag\/loop-inherit.tag\"><\/script>',
+          '<loop-inherit><\/loop-inherit>',
+
+          // check if the events get triggered correctly
+          '<script type=\"riot\/tag\" src=\"tag\/events.tag\"><\/script>',
+          '<events><\/events>',
+
+          // top most tag preserve attribute expressions
+          '<script type=\"riot\/tag\" src=\"tag\/top-attributes.tag\"><\/script>',
+          '<top-attributes cls="classy"><\/top-attributes>',
+
+          // loop over tags instances
+          '<script type=\"riot\/tag\" src=\"tag\/loop-tag-instances.tag\"><\/script>',
+          '<loop-tag-instances><\/loop-tag-instances>'
 
     ].join('\r'),
       tags = [],
@@ -373,7 +408,7 @@ describe('Compiler Browser', function() {
 
   })
 
-  /*it('compiles and unmount the children tags', function(done) {
+  it('compiles and unmount the children tags', function(done) {
 
     this.timeout(5000)
 
@@ -406,7 +441,7 @@ describe('Compiler Browser', function() {
     tag.unmount()
 
     // no time neither for one tick
-    // because the tag got unmounted too early
+    // because the tag got unisMounted too early
     setTimeout(function() {
       expect(ticks).to.be(0)
       done()
@@ -415,13 +450,16 @@ describe('Compiler Browser', function() {
   })
 
   it('compile a custom tag using custom css and js parsers', function() {
-    var tag = riot.mount('custom-parsers')[0],
-      stag = document.querySelector('style'),
-      styles =  normalizeHTML(stag.styleSheet ? stag.styleSheet.cssText : stag.innerHTML)
+    var tag = riot.mount('custom-parsers')[0]
+
+    // ie sucks!
+    var stag = document.querySelector('style'),
+        styles =  normalizeHTML(stag.styleSheet ? stag.styleSheet.cssText : stag.innerHTML)
 
     expect(tag).to.be.an('object')
     expect(tag.version).to.be('1.0.0')
     expect(styles).to.contain('custom-parsers {color: red;}')
+
 
     tags.push(tag)
 
@@ -534,36 +572,67 @@ describe('Compiler Browser', function() {
   it('the each loops update correctly the DOM nodes', function() {
     var onItemClick = function(e) {
           var elIndex = Array.prototype.slice.call(children).indexOf(e.currentTarget)
-          expect(tag.items[elIndex]).to.be.equal(e.item)
+          expect(tag.items[elIndex]).to.be.equal(e.item.item)
         },
-        tag = riot.mount('loop', { onItemClick: onItemClick })[0],
+        removeItemClick = function(e) {
+          var index = tag.removes.indexOf(e.item)
+          if (index < 0) return
+          tag.removes.splice(index, 1)
+        },
+        tag = riot.mount('loop', { onItemClick: onItemClick, removeItemClick: removeItemClick })[0],
         root = tag.root,
         button = root.getElementsByTagName('button')[0],
+        children,
         itemsCount = 5
 
     tags.push(tag)
 
     tag.items = []
+    tag.removes = []
 
     while (itemsCount--) {
+      tag.removes.push({
+        value: 'remove item #' + tag.items.length
+      })
       tag.items.push({
         value: 'item #' + tag.items.length
       })
     }
     tag.update()
 
-    expect(root.getElementsByTagName('li').length).to.be(5)
+    // remove item make sure item passed is correct
+    for (var i = 0; i < 5; i++) {
+      var curItem = tag.removes[0],
+        ev = {},
+        el = root.getElementsByTagName('dt')[0]
+      el.onclick(ev)
+      expect(curItem).to.be(ev.item)
+    }
+
+    children = root.getElementsByTagName('li')
+    Array.prototype.forEach.call(children, function(child) {
+      child.onclick({})
+    })
+    expect(children.length).to.be(5)
 
     // no update is required here
     button.onclick({})
+    children = root.getElementsByTagName('li')
+    expect(children.length).to.be(10)
 
-    expect(root.getElementsByTagName('li').length).to.be(10)
+    Array.prototype.forEach.call(children, function(child) {
+      child.onclick({})
+    })
 
     expect(normalizeHTML(root.getElementsByTagName('ul')[0].innerHTML)).to.be('<li>0 item #0 </li><li>1 item #1 </li><li>2 item #2 </li><li>3 item #3 </li><li>4 item #4 </li><li>5 item #5 </li><li>6 item #6 </li><li>7 item #7 </li><li>8 item #8 </li><li>9 item #9 </li>')
 
     tag.items.reverse()
     tag.update()
-    expect(root.getElementsByTagName('li').length).to.be(10)
+    children = root.getElementsByTagName('li')
+    expect(children.length).to.be(10)
+    Array.prototype.forEach.call(children, function(child) {
+      child.onclick({})
+    })
 
     expect(normalizeHTML(root.getElementsByTagName('ul')[0].innerHTML)).to.be('<li>0 item #9 </li><li>1 item #8 </li><li>2 item #7 </li><li>3 item #6 </li><li>4 item #5 </li><li>5 item #4 </li><li>6 item #3 </li><li>7 item #2 </li><li>8 item #1 </li><li>9 item #0 </li>'.trim())
 
@@ -571,6 +640,10 @@ describe('Compiler Browser', function() {
     tag.items[1] = tag.items[8]
     tag.items[8] = tempItem
     tag.update()
+
+    Array.prototype.forEach.call(children, function(child) {
+      child.onclick({})
+    })
 
     expect(normalizeHTML(root.getElementsByTagName('ul')[0].innerHTML)).to.be('<li>0 item #9 </li><li>1 item #1 </li><li>2 item #7 </li><li>3 item #6 </li><li>4 item #5 </li><li>5 item #4 </li><li>6 item #3 </li><li>7 item #2 </li><li>8 item #8 </li><li>9 item #0 </li>'.trim())
 
@@ -588,14 +661,21 @@ describe('Compiler Browser', function() {
 
     expect(children.length).to.be(2)
     expect(tag.tags['looped-child'].length).to.be(2)
+    expect(tag.tags['looped-child'][0].hit).to.be.a('function')
     expect(normalizeHTML(children[0].innerHTML)).to.be('<h3>one</h3><button>one</button>')
     expect(normalizeHTML(children[1].innerHTML)).to.be('<h3>two</h3><button>two</button>')
 
     tag.items = [ {name: 'one'}, {name: 'two'}, {name: 'three'} ]
     tag.update()
     expect(root.getElementsByTagName('looped-child').length).to.be(3)
-    expect(tag.tags['looped-child'][2].mounted).to.be(true)
+
+    expect(tag.tags['looped-child'][2].isMounted).to.be(true)
     expect(tag.tags['looped-child'].length).to.be(3)
+
+    expect(root.getElementsByTagName('looped-child')[0].style.color).to.be('red')
+    root.getElementsByTagName('looped-child')[0].getElementsByTagName('button')[0].onclick({})
+    expect(root.getElementsByTagName('looped-child')[0].style.color).to.be('blue')
+
 
     tags.push(tag)
 
@@ -614,7 +694,7 @@ describe('Compiler Browser', function() {
 
     var i = multipleTags.length
 
-    while(i--) {
+    while (i--) {
       tags.push(multipleTags[i])
     }
 
@@ -639,6 +719,24 @@ describe('Compiler Browser', function() {
 
     expect(normalizeHTML(root.getElementsByTagName('ul')[0].innerHTML)).to.be('<li>100 <a>remove</a></li><li>100 <a>remove</a></li><li>0 <a>remove</a></li><li>1 <a>remove</a></li><li>2 <a>remove</a></li><li>3 <a>remove</a></li><li>4 <a>remove</a></li><li>5 <a>remove</a></li><li>100 <a>remove</a></li><li>100 <a>remove</a></li>'.trim())
 
+
+  })
+
+  it('iterate over an object, then modify the property and update itself', function() {
+
+    var tag = riot.mount('loop-object')[0]
+    var root = tag.root
+
+    tags.push(tag)
+
+    expect(normalizeHTML(root.getElementsByTagName('div')[0].innerHTML))
+      .to.be('<p>zero = 0</p><p>one = 1</p><p>two = 2</p><p>three = 3</p>')
+
+    for (key in tag.obj)                              // eslint-disable-line guard-for-in
+      tag.obj[key] = tag.obj[key] * 2
+    tag.update()
+    expect(normalizeHTML(root.getElementsByTagName('div')[0].innerHTML))
+      .to.be('<p>zero = 0</p><p>one = 2</p><p>two = 4</p><p>three = 6</p>')
 
   })
 
@@ -686,9 +784,8 @@ describe('Compiler Browser', function() {
 
     tags.push(tag)
 
-    })*/
+  })
 
-  /*
   it('brackets', function() {
 
     var tag
@@ -698,7 +795,7 @@ describe('Compiler Browser', function() {
     tag = riot.mount('test-a')[0]
     tags.push(tag)
 
-    expect(normalizeHTML(tag.root.innerHTML)).to.be('<p>ok</p>') */
+    expect(normalizeHTML(tag.root.innerHTML)).to.be('<p>ok</p>')
 
     /*
 
@@ -710,7 +807,7 @@ describe('Compiler Browser', function() {
     tags.push(tag)
 
     */
-  /* expect(normalizeHTML(tag.root.innerHTML)).to.be('<p>ok</p>')
+    expect(normalizeHTML(tag.root.innerHTML)).to.be('<p>ok</p>')
 
     riot.settings.brackets = '${ }'
     riot.tag('test-c', '<p>${ x }</p>', function() { this.x = 'ok' })
@@ -744,9 +841,9 @@ describe('Compiler Browser', function() {
 
     expect(normalizeHTML(tag.root.innerHTML)).to.be('<p>ok</p>')
 
-    })*/
+  })
 
-  /*it('riot-tag attribute', function() {
+  it('riot-tag attribute', function() {
 
     var tag = riot.mount('#rtag', { val: 10 })[0]
     expect(normalizeHTML(tag.root.innerHTML)).to.be('<p>val: 10</p>')
@@ -812,6 +909,19 @@ describe('Compiler Browser', function() {
 
   })
 
+  it('multiple mount <yield> tag', function() {
+
+    riot.mount('inner-html')
+    riot.mount('inner-html')
+    riot.mount('inner-html')
+    riot.mount('inner-html')
+    tag = riot.mount('inner-html')[0]
+
+    expect(normalizeHTML(tag.root.innerHTML)).to.be('<h1>Hello,   World  <inner value="ciao mondo"><p> ciao mondo </p></inner></h1>')
+    tags.push(tag)
+
+  })
+
   it('<yield> contents in a child get always compiled using its parent data', function(done) {
 
     var tag = riot.mount('yield-parent', {
@@ -861,6 +971,8 @@ describe('Compiler Browser', function() {
     tag.update()
 
     expect(tag.root.innerHTML).to.be('changed')
+
+    tags.push(tag)
   })
 
   it('top level attr manipulation having expression', function() {
@@ -892,6 +1004,21 @@ describe('Compiler Browser', function() {
     expect(styles).to.match(/p(.+)?{color: blue;}/)
     expect(styles).to.match(/div(.+)?{color: red;}/)
   })
+
+  it('style injection removes type riot style tag', function() {
+    var stag = document.querySelector('style[type=riot]')
+    expect(stag).to.be(null)
+  })
+
+  if (typeof window.__karma__ === 'undefined') {
+    it('style tag sits in between title and link to stylesheet', function () {
+      var stag = document.querySelector('style')
+      var prevE = stag.previousElementSibling
+      var nextE = stag.nextElementSibling
+      expect(prevE.tagName).to.be('TITLE')
+      expect(nextE.tagName).to.be('LINK')
+    })
+  }
 
   it('scoped css and riot-tag, mount(selector, tagname)', function() {
     function checkBorder(t) {
@@ -940,8 +1067,8 @@ describe('Compiler Browser', function() {
     expect(tag.tags['tags-child'].root.innerHTML).to.be('I have a name')
 
     tags.push(tag)
-    })*/
-  /*
+  })
+
   it('preserve the mount order, first the parent and then all the children', function() {
     var correctMountingOrder = [
         'deferred-mount',
@@ -977,30 +1104,30 @@ describe('Compiler Browser', function() {
     expect(tag['fancy-name'].innerHTML).to.be('john')
 
     tags.push(tag)
-    })*/
+  })
 
   it('mount event should only be triggered when the conditional tags are in the DOM', function() {
     var tag = riot.mount('if-mount')[0]
 
     expect(tag.tags.ff.tags['if-level2'].tags['conditional-tag'].isMounted).to.be(false)
-    /*expect(tag.tags.ft.tags['if-level2'].tags['conditional-tag'].mounted).to.be(false)
-    expect(tag.tags.tf.tags['if-level2'].tags['conditional-tag'].mounted).to.be(false)
-    expect(tag.tags.tt.tags['if-level2'].tags['conditional-tag'].mounted).to.be(true)
+    expect(tag.tags.ft.tags['if-level2'].tags['conditional-tag'].isMounted).to.be(false)
+    expect(tag.tags.tf.tags['if-level2'].tags['conditional-tag'].isMounted).to.be(false)
+    expect(tag.tags.tt.tags['if-level2'].tags['conditional-tag'].isMounted).to.be(true)
 
     tag.tags.tf.tags['if-level2'].toggleCondition()
-    expect(tag.tags.tf.tags['if-level2'].tags['conditional-tag'].mounted).to.be(true)
+    expect(tag.tags.tf.tags['if-level2'].tags['conditional-tag'].isMounted).to.be(true)
 
     tag.tags.ft.toggleCondition()
-    expect(tag.tags.tf.tags['if-level2'].tags['conditional-tag'].mounted).to.be(true)
+    expect(tag.tags.tf.tags['if-level2'].tags['conditional-tag'].isMounted).to.be(true)
 
     tag.tags.ff.tags['if-level2'].toggleCondition()
-    expect(tag.tags.ff.tags['if-level2'].tags['conditional-tag'].mounted).to.be(false)
+    expect(tag.tags.ff.tags['if-level2'].tags['conditional-tag'].isMounted).to.be(false)
 
     tag.tags.ff.toggleCondition()
-    expect(tag.tags.ff.tags['if-level2'].tags['conditional-tag'].mounted).to.be(true)*/
+    expect(tag.tags.ff.tags['if-level2'].tags['conditional-tag'].isMounted).to.be(true)
 
     tags.push(tag)
-  }) /*
+  })
   it('preserve the mount order, first the parent and then all the children', function() {
     var correctMountingOrder = [
         'deferred-mount',
@@ -1027,17 +1154,25 @@ describe('Compiler Browser', function() {
   })
 
   it('multi named elements to an array', function() {
-    var tag = riot.mount('multi-named')[0]
-    tag.on('mount', function() {
+    var mount = function() {
+      var tag = this
       expect(tag.rad[0].value).to.be('1')
       expect(tag.rad[1].value).to.be('2')
       expect(tag.rad[2].value).to.be('3')
       expect(tag.t.value).to.be('1')
+      expect(tag.t_1.value).to.be('1')
+      expect(tag.t_2.value).to.be('2')
+      expect(tag.c[0].value).to.be('1')
+      expect(tag.c[1].value).to.be('2')
+    },
+    mountChild = function() {
+      var tag = this
       expect(tag.child.value).to.be('child')
-      expect(tag.checks[0].value).to.be('one')
-      expect(tag.checks[1].value).to.be('two')
-      expect(tag.checks[2].value).to.be('three')
-    })
+      expect(tag.check[0].value).to.be('one')
+      expect(tag.check[1].value).to.be('two')
+      expect(tag.check[2].value).to.be('three')
+    }
+    var tag = riot.mount('multi-named', { mount: mount, mountChild: mountChild })[0]
 
     tags.push(tag)
   })
@@ -1054,6 +1189,180 @@ describe('Compiler Browser', function() {
     var tag = riot.mount('container-riot')[0]
     var div = tag.root.getElementsByTagName('div')[0]
     expect(div.getAttribute('riot-tag')).to.be('nested-riot')
+    tags.push(tag)
+  })
+
+  it('recursive structure', function() {
+    var tag = riot.mount('treeview')[0]
+    expect(tag).to.be.an('object')
+    expect(tag.isMounted).to.be(true)
+    tags.push(tag)
+  })
+
+  it('the loops children sync correctly their internal data with their options', function() {
+    var tag = riot.mount('loop-sync-options')[0]
+
+    expect(tag.tags['loop-sync-options-child'][0].val).to.be('foo')
+    expect(tag.tags['loop-sync-options-child'][1].val).to.be(undefined)
+    expect(tag.tags['loop-sync-options-child'][2].val).to.be(undefined)
+    expect(tag.tags['loop-sync-options-child'][0].num).to.be(undefined)
+    expect(tag.tags['loop-sync-options-child'][1].num).to.be(3)
+    expect(tag.tags['loop-sync-options-child'][2].num).to.be(undefined)
+    expect(tag.tags['loop-sync-options-child'][0].bool).to.be(undefined)
+    expect(tag.tags['loop-sync-options-child'][1].bool).to.be(undefined)
+    expect(tag.tags['loop-sync-options-child'][2].bool).to.be(false)
+    tag.update({
+      children: tag.children.reverse()
+    })
+    expect(tag.tags['loop-sync-options-child'][0].val).to.be(undefined)
+    expect(tag.tags['loop-sync-options-child'][1].val).to.be(undefined)
+    expect(tag.tags['loop-sync-options-child'][2].val).to.be('foo')
+    expect(tag.tags['loop-sync-options-child'][0].num).to.be(undefined)
+    expect(tag.tags['loop-sync-options-child'][1].num).to.be(3)
+    expect(tag.tags['loop-sync-options-child'][2].num).to.be(undefined)
+    expect(tag.tags['loop-sync-options-child'][0].bool).to.be(false)
+    expect(tag.tags['loop-sync-options-child'][1].bool).to.be(undefined)
+    expect(tag.tags['loop-sync-options-child'][2].bool).to.be(undefined)
+
+    tag.update({
+      children: tag.children.reverse()
+    })
+    expect(tag.tags['loop-sync-options-child'][0].val).to.be('foo')
+    expect(tag.tags['loop-sync-options-child'][1].val).to.be(undefined)
+    expect(tag.tags['loop-sync-options-child'][2].val).to.be(undefined)
+    expect(tag.tags['loop-sync-options-child'][0].num).to.be(undefined)
+    expect(tag.tags['loop-sync-options-child'][1].num).to.be(3)
+    expect(tag.tags['loop-sync-options-child'][2].num).to.be(undefined)
+    expect(tag.tags['loop-sync-options-child'][0].bool).to.be(undefined)
+    expect(tag.tags['loop-sync-options-child'][1].bool).to.be(undefined)
+    expect(tag.tags['loop-sync-options-child'][2].bool).to.be(false)
+    tags.push(tag)
+  })
+
+  it('the loops children sync correctly their internal data even when they are nested', function() {
+    var tag = riot.mount('loop-sync-options-nested')[0]
+
+    expect(tag.tags['loop-sync-options-nested-child'][0].parent.root.tagName.toLowerCase()).to.be('loop-sync-options-nested')
+    expect(tag.tags['loop-sync-options-nested-child'][0].val).to.be('foo')
+    expect(tag.tags['loop-sync-options-nested-child'][1].val).to.be(undefined)
+    expect(tag.tags['loop-sync-options-nested-child'][2].val).to.be(undefined)
+    expect(tag.tags['loop-sync-options-nested-child'][0].num).to.be(undefined)
+    expect(tag.tags['loop-sync-options-nested-child'][1].num).to.be(3)
+    expect(tag.tags['loop-sync-options-nested-child'][2].num).to.be(undefined)
+    expect(tag.tags['loop-sync-options-nested-child'][0].bool).to.be(undefined)
+    expect(tag.tags['loop-sync-options-nested-child'][1].bool).to.be(undefined)
+    expect(tag.tags['loop-sync-options-nested-child'][2].bool).to.be(false)
+    tag.update({
+      children: tag.children.reverse()
+    })
+    tag.update()
+    expect(tag.tags['loop-sync-options-nested-child'][0].val).to.be(undefined)
+    expect(tag.tags['loop-sync-options-nested-child'][1].val).to.be(undefined)
+    expect(tag.tags['loop-sync-options-nested-child'][2].val).to.be('foo')
+    expect(tag.tags['loop-sync-options-nested-child'][0].num).to.be(undefined)
+    expect(tag.tags['loop-sync-options-nested-child'][1].num).to.be(3)
+    expect(tag.tags['loop-sync-options-nested-child'][2].num).to.be(undefined)
+    expect(tag.tags['loop-sync-options-nested-child'][0].bool).to.be(false)
+    expect(tag.tags['loop-sync-options-nested-child'][1].bool).to.be(undefined)
+    expect(tag.tags['loop-sync-options-nested-child'][2].bool).to.be(undefined)
+    expect(tag.tags['loop-sync-options-nested-child'][2].parent.root.tagName.toLowerCase()).to.be('loop-sync-options-nested')
+    tag.update({
+      children: tag.children.reverse()
+    })
+    tag.update()
+    expect(tag.tags['loop-sync-options-nested-child'][0].val).to.be('foo')
+    expect(tag.tags['loop-sync-options-nested-child'][1].val).to.be(undefined)
+    expect(tag.tags['loop-sync-options-nested-child'][2].val).to.be(undefined)
+    expect(tag.tags['loop-sync-options-nested-child'][0].num).to.be(undefined)
+    expect(tag.tags['loop-sync-options-nested-child'][1].num).to.be(3)
+    expect(tag.tags['loop-sync-options-nested-child'][2].num).to.be(undefined)
+    expect(tag.tags['loop-sync-options-nested-child'][0].bool).to.be(undefined)
+    expect(tag.tags['loop-sync-options-nested-child'][1].bool).to.be(undefined)
+    expect(tag.tags['loop-sync-options-nested-child'][2].bool).to.be(false)
+
+    tags.push(tag)
+  })
+
+  it('children in a loop inherit properties from the parent', function() {
+    var tag = riot.mount('loop-inherit')[0]
+    expect(tag.tags['loop-inherit-item'][0].opts.nice).to.be(tag.isFun)
+    tag.isFun = false
+    tag.update()
+    expect(tag.tags['loop-inherit-item'][0].opts.nice).to.be(tag.isFun)
+    expect(tag.tags['loop-inherit-item'][0].tags).to.be.empty()
+    tags.push(tag)
+  })
+
+  it('custom children items in a nested loop are always in sync with the parent tag', function() {
+    var tag = riot.mount('loop-inherit')[0]
+    expect(tag.tags['loop-inherit-item'].length).to.be(3)
+    expect(tag.tags['loop-inherit-item'][0].opts.name).to.be(tag.items[0])
+    expect(tag.tags['loop-inherit-item'][1].opts.name).to.be(tag.items[1])
+    expect(tag.tags['loop-inherit-item'][2].opts.name).to.be(tag.items[2])
+    tag.items.splice(1, 1)
+    tag.update()
+    expect(tag.root.getElementsByTagName('div').length).to.be(2)
+    tag.items.push('active')
+    tag.update()
+    expect(tag.root.getElementsByTagName('div').length).to.be(3)
+    expect(tag.root.getElementsByTagName('div')[2].innerHTML).to.contain('active')
+    expect(tag.root.getElementsByTagName('div')[2].className).to.be('active')
+
+    /*
+    TODO: keep in sync also the nested custom tags in a loop
+    expect(tag.tags['loop-inherit-item'][0].opts.name).to.be(tag.items[0])
+    expect(tag.tags['loop-inherit-item'][1].opts.name).to.be(tag.items[1])
+    expect(tag.tags['loop-inherit-item'].length).to.be(2)
+
+    expect(tag.tags['loop-inherit-item'].length).to.be(3)
+    expect(tag.tags['loop-inherit-item'][2].opts.name).to.be(tag.items[2])
+    */
+  })
+
+  it('loops over other tag instances do not override their internal properties', function() {
+    var tag = riot.mount('loop-tag-instances')[0]
+
+    expect(tag.tags['loop-tag-instances-child'].length).to.be(5)
+    expect(tag.tags['loop-tag-instances-child'][0].root.tagName.toLowerCase()).to.be('loop-tag-instances-child')
+    tag.update()
+    expect(tag.tags['loop-tag-instances-child'][3].root.tagName.toLowerCase()).to.be('loop-tag-instances-child')
+
+  })
+
+  it('all the events get fired also in the loop tags, the e.item property gets preserved', function() {
+    var currentItem,
+      currentIndex,
+      callbackCalls = 0,
+      tag = riot.mount('events', {
+        cb: function(e) {
+          expect(e.item.val).to.be(currentItem)
+          expect(e.item.index).to.be(currentIndex)
+          callbackCalls++
+        }
+      })[0],
+      divTags = tag.root.getElementsByTagName('div')
+
+
+
+    currentItem = tag.items[0]
+    currentIndex = 0
+    divTags[0].onclick({})
+    tag.items.reverse()
+    tag.update()
+    currentItem = tag.items[0]
+    currentIndex = 0
+    divTags[0].onclick({})
+
+    expect(callbackCalls).to.be(2)
+
+    tags.push(tag)
+  })
+
+  it('top most tag preserve attribute expressions', function() {
+    var tag = riot.mount('top-attributes')[0]
+    expect(tag.root.className).to.be('classy') // qouted
+    expect(tag.root.getAttribute('data-noquote')).to.be('quotes') // not quoted
+    expect(tag.root.style.fontSize).to.be('2em') // TODO: how to test riot-prefix?
     tags.push(tag)
   })
 

@@ -11,9 +11,20 @@
 [![NPM downloads][npm-downloads-image]][npm-url]
 [![MIT License][license-image]][license-url]
 [![Coverage Status][coverage-image]][coverage-url]
+[![Code Quality][codeclimate-image]][codeclimate-url]
 
 
 [![Sauce Test Status][saucelabs-image]][saucelabs-url]
+
+### Framework Size Comparison
+
+| Framework              | Version    | Minified Size |
+|------------------------|------------|---------------|
+| Ember                  | 1.13.3     | 493.3kb       |
+| Angular                | 1.4.2      | 145.5kb       |
+| React                  | 0.13.3     | 121.7kb       |
+| Web Components Polyfill| 0.7.5      | 117.1kb       |
+| Riot                   | 2.2.2      | <span class="riot-size">13.11kb</span> |
 
 
 ### Custom tags • Concise syntax • Virtual DOM • Full stack • IE8
@@ -129,16 +140,15 @@ HTML syntax is the de facto language on the web and it's designed for building u
 - [iToolkit](https://github.com/BE-FE/iToolkit)
 
 ### Resources
-- [Riot + Angular](https://github.com/lucasbrigida/angular-riot)
+- [Riot + AngularJS](https://github.com/lucasbrigida/angular-riot)
 - [Module loader for WebPack](https://www.npmjs.com/package/riotjs-loader)
-- [Riot module for AngularJS](https://github.com/lucasbrigida/angular-riot)
 - [Riot + Meteor]( https://atmospherejs.com/xaiki/riotjs)
-- [Riot on CodeClimate](https://codeclimate.com/github/muut/riotjs/code)
 - [Riot Snake Game](http://cdn.rawgit.com/atian25/blog/master/assets/riot-snake.html)
 - [Riot Tag Syntax Checker](http://cognitom.github.io/riot-checker/)
 - [Riot 文档中译版](https://github.com/Centaur/riotjs_doc_cn) :cn:
 - [Riot + Wintersmith](https://github.com/collingreen/wintersmith-riot)
 - [Riot precompiler plugin for lineman](https://github.com/Power-Inside/lineman-riot)
+- [Riot Startkit - Flux inspired skeleton app + WebPack + PostCSS](https://github.com/wbkd/riotjs-startkit)
 
 ### Miscellaneous
 - [Q&A with RiotJS author Tero Piirainen](http://www.triplet.fi/blog/q-and-a-with-riotjs-author-tero-piirainen/)
@@ -149,94 +159,111 @@ Riot is made with :heart: by many smart people. Thanks to all the contributors
 
 ```
  project  : riot
- repo age : 1 year, 9 months
- active   : 303 days
- commits  : 1276
- files    : 189
+ repo age : 1 year, 10 months
+ active   : 366 days
+ commits  : 1524
+ files    : 200
  authors  :
-   383  Tero Piirainen          30.0%
-   342  Gianluca Guarini        26.8%
-   150  Aurimas                 11.8%
-    41  Tsutomu Kawamura        3.2%
-    35  rsbondi                 2.7%
-    27  Marcelo Eden            2.1%
-    19  Kalman Speier           1.5%
-    18  Juha Lindstedt          1.4%
-    14  andynemzek              1.1%
-    12  Márcio Coelho          0.9%
-    11  Hrvoje Šimić          0.9%
-    10  Andy VanEe              0.8%
-     9  Anton Heryanto          0.7%
-     8  Alberto Martínez       0.6%
-     8  Mark Henderson          0.6%
-     8  Andreas Heintze         0.6%
-     7  Ashley Brener           0.5%
+   484  Gianluca Guarini        31.8%
+   392  Tero Piirainen          25.7%
+   150  Aurimas                 9.8%
+    50  Tsutomu Kawamura        3.3%
+    44  rsbondi                 2.9%
+    27  Marcelo Eden            1.8%
+    20  Kalman Speier           1.3%
+    18  Márcio Coelho          1.2%
+    18  Juha Lindstedt          1.2%
+    17  Alberto Martínez       1.1%
+    15  Anton Heryanto          1.0%
+    14  andynemzek              0.9%
+    13  Greg                    0.9%
+    11  Hrvoje Šimić          0.7%
+    10  Andy VanEe              0.7%
+     9  a-moses                 0.6%
+     9  Avner Peled             0.6%
+     8  Mark Henderson          0.5%
+     8  Andreas Heintze         0.5%
+     7  Richard Bondi           0.5%
+     7  Lee Tagg                0.5%
      7  marciojcoelho           0.5%
+     7  Ashley Brener           0.5%
+     7  Avnerus                 0.5%
      7  Tianxiang Chen          0.5%
-     6  Jens Anders Bakke       0.5%
-     6  Greg                    0.5%
-     6  hemanth.hm              0.5%
-     5  jigsaw                  0.4%
-     5  Avner Peled             0.4%
-     5  midinastasurazz         0.4%
-     4  blissland               0.3%
-     4  Avnerus                 0.3%
+     6  Jens Anders Bakke       0.4%
+     6  sethyuan                0.4%
+     6  hemanth.hm              0.4%
+     5  midinastasurazz         0.3%
+     5  Tatu Tamminen           0.3%
+     5  jigsaw                  0.3%
+     4  xieyu33333              0.3%
      4  Eric Baer               0.3%
+     4  Jasmine Hegman          0.3%
      4  Giovanni Cappellotto    0.3%
-     4  Tatu Tamminen           0.3%
-     4  Richard Bondi           0.3%
-     3  sethyuan                0.2%
-     3  Jim Sparkman            0.2%
+     4  blissland               0.3%
      3  Alan R. Soares          0.2%
      3  Artem Medeusheyev       0.2%
-     3  korige                  0.2%
+     3  Jim Sparkman            0.2%
      3  Magnus Wolffelt         0.2%
-     2  xieyu33333              0.2%
-     2  yibuyisheng             0.2%
-     2  Žiga                   0.2%
-     2  Markus A. Stone         0.2%
-     2  Philippe CHARRIERE      0.2%
-     2  Tobias Baunbæk         0.2%
-     2  Andrew Luetgers         0.2%
-     2  Antoine Goutagny        0.2%
-     2  Tim Kindberg            0.2%
-     2  Andrew Feng             0.2%
-     2  crazy2be                0.2%
-     2  Steve Clay              0.2%
-     2  jmas                    0.2%
-     2  luffs                   0.2%
-     2  Moot Inc                0.2%
-     2  Simon JAILLET           0.2%
-     2  Sergey Martynov         0.2%
-     2  Alexis THOMAS           0.2%
-     1  陈海峰               0.1%
-     1  Andrew Kiellor          0.1%
-     1  Ari Makela              0.1%
-     1  Barkóczi Dávid        0.1%
-     1  Benoit Hirbec           0.1%
-     1  Boris Huai              0.1%
-     1  Collin Green            0.1%
+     3  korige                  0.2%
+     2  Markus A. Stone         0.1%
+     2  Philippe CHARRIERE      0.1%
+     2  Bolt                    0.1%
+     2  Žiga                   0.1%
+     2  Milosz                  0.1%
+     2  David Salazar           0.1%
+     2  crazy2be                0.1%
+     2  Mohammed Irfan          0.1%
+     2  Moot Inc                0.1%
+     2  Sergey Martynov         0.1%
+     2  jmas                    0.1%
+     2  陈海峰               0.1%
+     2  Tim Kindberg            0.1%
+     2  luffs                   0.1%
+     2  Antoine Goutagny        0.1%
+     2  Andrew Luetgers         0.1%
+     2  Tobias Baunbæk         0.1%
+     2  oldpig                  0.1%
+     2  Andrew Kiellor          0.1%
+     2  Andrew Feng             0.1%
+     2  Simon JAILLET           0.1%
+     2  Collin Green            0.1%
+     2  Alexis THOMAS           0.1%
+     2  yibuyisheng             0.1%
+     2  Eric Capps              0.1%
+     2  Steve Clay              0.1%
+     1  The Gitter Badger       0.1%
      1  Constantin Rack         0.1%
-     1  Courtney Couch          0.1%
-     1  Danil Semelenov         0.1%
-     1  David Salazar           0.1%
-     1  Eliseo Arias            0.1%
-     1  Eric Capps              0.1%
-     1  Fernando Correia        0.1%
-     1  Ian Walter              0.1%
-     1  Ivan Saorin             0.1%
-     1  Joel Thornton           0.1%
+     1  Trent Ogren             0.1%
+     1  Umut Sirin              0.1%
+     1  Zach Aysan              0.1%
+     1  Boris Huai              0.1%
+     1  afc163                  0.1%
+     1  Benoit Hirbec           0.1%
+     1  borishuai               0.1%
+     1  boynet                  0.1%
+     1  h2so5                   0.1%
+     1  Barkóczi Dávid        0.1%
+     1  Ari Makela              0.1%
+     1  kylobite                0.1%
+     1  nino-porcino            0.1%
+     1  typicode                0.1%
+     1  xieyu03                 0.1%
      1  Jonathan Dumaine        0.1%
-     1  Jonny Buchanan          0.1%
      1  Jorrit Schippers        0.1%
+     1  Jonny Buchanan          0.1%
+     1  Joel Thornton           0.1%
      1  Justin Dorfman          0.1%
      1  Juwan Yoo               0.1%
+     1  Ivan Saorin             0.1%
+     1  Ian Walter              0.1%
      1  Liu Jin                 0.1%
+     1  Fernando Correia        0.1%
      1  Marcin Jekot            0.1%
      1  Matthew McCullough      0.1%
      1  Maxence Dalmais         0.1%
      1  Mike Breen              0.1%
-     1  Mohammed Irfan          0.1%
+     1  Mike Ward               0.1%
+     1  Eliseo Arias            0.1%
      1  Patrik Buckau           0.1%
      1  Quim Calpe              0.1%
      1  Riccardo Gueli Alletti  0.1%
@@ -246,18 +273,9 @@ Riot is made with :heart: by many smart people. Thanks to all the contributors
      1  Steel Brain             0.1%
      1  Steven Koch             0.1%
      1  TZ | 天猪             0.1%
+     1  Danil Semelenov         0.1%
      1  Tenor Biel              0.1%
-     1  The Gitter Badger       0.1%
-     1  Trent Ogren             0.1%
-     1  Umut Sirin              0.1%
-     1  Zach Aysan              0.1%
-     1  a-moses                 0.1%
-     1  afc163                  0.1%
-     1  borishuai               0.1%
-     1  kylobite                0.1%
-     1  oldpig                  0.1%
-     1  typicode                0.1%
-     1  xieyu03                 0.1%
+     1  Courtney Couch          0.1%
 ```
 
 https://muut.com/riotjs/
@@ -284,3 +302,6 @@ https://muut.com/riotjs/
 
 [gitter-image]:https://img.shields.io/badge/GITTER-JOIN_CHAT_%E2%86%92-1dce73.svg?style=flat-square
 [gitter-url]:https://gitter.im/riot/riot?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
+[codeclimate-image]:https://img.shields.io/codeclimate/github/riot/riot.svg?style=flat-square
+[codeclimate-url]:https://codeclimate.com/github/riot/riot
