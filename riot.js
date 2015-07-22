@@ -1,8 +1,8 @@
-/* Riot v2.2.2, @license MIT, (c) 2015 Muut Inc. + contributors */
+/* Riot WIP, @license MIT, (c) 2015 Muut Inc. + contributors */
 
 ;(function(window, undefined) {
   'use strict'
-  var riot = { version: 'v2.2.2', settings: {} }
+  var riot = { version: 'WIP', settings: {} }
 
   // This globals 'const' helps code size reduction
 
@@ -420,7 +420,7 @@ var tmpl = (function() {
 // { key, i in items} -> { key, i, items }
 function loopKeys(expr) {
   var b0 = brackets(0),
-      els = expr.slice(b0.length).match(/^\s*(\S+?)\s*(?:,\s*(\S+))?\s+in\s+(.+)$/)
+      els = expr.trim().slice(b0.length).match(/^\s*(\S+?)\s*(?:,\s*(\S+))?\s+in\s+(.+)$/)
   return els ? { key: els[1], pos: els[2], val: b0 + els[3] } : { val: expr }
 }
 
@@ -659,7 +659,7 @@ function Tag(impl, conf, innerHTML) {
 
   // create a unique id to this tag
   // it could be handy to use it also to improve the virtual dom rendering speed
-  this._id = fastAbs(~~(new Date().getTime() * Math.random()))
+  this._id = ~~(Date.now() * Math.random())
 
   extend(this, { parent: parent, root: root, opts: opts, tags: {} }, item)
 
@@ -670,7 +670,7 @@ function Tag(impl, conf, innerHTML) {
     if (brackets(/\{.*\}/).test(val)) attr[el.name] = val
   })
 
-  if (dom.innerHTML && !/select|select|optgroup|tbody|tr/.test(tagName))
+  if (dom.innerHTML && !/select|optgroup|tbody|tr/.test(tagName))
     // replace all the yield tags with the tag inner html
     dom.innerHTML = replaceYield(dom.innerHTML, innerHTML)
 
@@ -715,7 +715,7 @@ function Tag(impl, conf, innerHTML) {
     // inherit properties from the parent
     inheritFromParent()
     // normalize the tag properties in case an item object was initially passed
-    if (typeof item === T_OBJECT || isArray(item)) {
+    if (data && typeof item === T_OBJECT || isArray(item)) {
       normalizeData(data)
       item = data
     }
@@ -986,19 +986,15 @@ function remAttr(dom, name) {
   dom.removeAttribute(name)
 }
 
-function fastAbs(nr) {
-  return (nr ^ (nr >> 31)) - (nr >> 31)
-}
-
 function getTag(dom) {
-  var tagName = dom.tagName.toLowerCase()
-  return tagImpl[dom.getAttribute(RIOT_TAG) || tagName]
+  return tagImpl[dom.getAttribute(RIOT_TAG) || dom.tagName.toLowerCase()]
 }
 
 function getTagName(dom) {
   var child = getTag(dom),
     namedTag = dom.getAttribute('name'),
-    tagName = namedTag && namedTag.indexOf(brackets(0)) < 0 ? namedTag : child ? child.name : dom.tagName.toLowerCase()
+    tagName = namedTag && namedTag.indexOf(brackets(0)) < 0 ?
+              namedTag : child ? child.name : dom.tagName.toLowerCase()
 
   return tagName
 }
@@ -1198,9 +1194,14 @@ var RIOT_TAG = 'riot-tag'
 
 function injectStyle(css) {
 
-  styleNode = styleNode || mkEl('style')
+  if (riot.render) return // skip injection on the server
 
-  if (!document.head) return
+  if (!styleNode) {
+    styleNode = mkEl('style')
+    styleNode.setAttribute('type', 'text/css')
+  }
+
+  var head = document.head || document.getElementsByTagName('head')[0]
 
   if (styleNode.styleSheet)
     styleNode.styleSheet.cssText += css
@@ -1215,7 +1216,7 @@ function injectStyle(css) {
       if (rs) {
         rs.parentNode.insertBefore(styleNode, rs)
         rs.parentNode.removeChild(rs)
-      } else document.head.appendChild(styleNode)
+      } else head.appendChild(styleNode)
 
     }
 
@@ -1355,7 +1356,6 @@ riot.update = function() {
 // @deprecated
 riot.mountTo = riot.mount
 
-
   // share methods for other riot parts, e.g. compiler
   riot.util = { brackets: brackets, tmpl: tmpl }
 
@@ -1368,4 +1368,4 @@ riot.mountTo = riot.mount
   else
     window.riot = riot
 
-})(typeof window != 'undefined' ? window : undefined);
+})(typeof window != 'undefined' ? window : void 0);
